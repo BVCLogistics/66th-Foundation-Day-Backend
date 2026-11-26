@@ -1,0 +1,1 @@
+{"name":"bvc-reviewer","private":true,"type":"module","scripts":{"build":"node build.mjs"},"dependencies":{"@zip.js/zip.js":"2.25.0","esbuild":"0.28.2"}}

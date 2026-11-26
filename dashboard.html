@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Private BVC Logistics Foundation Week submissions dashboard and export.">
+<title>BVC Logistics | Private Reviewer Dashboard</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #172131;
+  --muted: #4d596a;
+  --rule: #c5cedb;
+  --paper: #f6f8fa;
+  --accent: #183d91;
+  --tint: #e9effd;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: var(--paper); font: 1rem/1.55 system-ui, sans-serif; }
+a { color: inherit; }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid #416de1; outline-offset: 3px; }
+.wrap { width: min(100% - 3rem, 69rem); margin-inline: auto; }
+.top { background: white; border-bottom: 1px solid var(--rule); }
+.top .wrap, footer .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; }
+.wordmark { font-weight: 800; letter-spacing: -.04em; font-size: 1.25rem; }
+.eyebrow, .entry-type { font: 700 .82rem/1.3 ui-monospace, monospace; letter-spacing: .065em; text-transform: uppercase; }
+.eyebrow { margin: 0 0 .8rem; color: var(--accent); }
+h1, h2, h3, p { margin-top: 0; }
+h1 { font-size: clamp(2.75rem, 6.5vw, 5.75rem); font-weight: 770; line-height: .98; letter-spacing: -.075em; margin-bottom: 1.25rem; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; text-decoration: none; font-weight: 700; border: 1px solid var(--accent); background: var(--accent); color: white; border-radius: .4rem; padding: .6rem 1rem; text-align: center; }
+.btn:hover { background: #102e73; color: white; }
+.outline { background: white; color: var(--accent); }
+footer { border-top: 1px solid var(--rule); color: var(--muted); }
+footer .wrap { flex-wrap: wrap; }
+footer p { margin: 0; font-size: .9rem; }
+dialog { border: 1px solid var(--rule); border-radius: .75rem; width: min(34rem, 100% - 2rem); max-height: calc(100% - 2rem); padding: 1.5rem; color: var(--ink); background: white; }
+dialog::backdrop { background: #1721319c; }
+.dialog-head { display: flex; gap: .75rem; justify-content: space-between; align-items: flex-start; }
+.dialog-head h2 { line-height: 1.15; margin-bottom: .4rem; letter-spacing: -.03em; }
+.close { min-width: 2.75rem; min-height: 2.75rem; background: white; border: 1px solid var(--rule); border-radius: .4rem; font-size: 1.25rem; color: var(--ink); }
+label { display: block; font-weight: 700; }
+.field { display: grid; gap: .3rem; }
+
+
+
+.review { padding-block: 3rem; }
+.review h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); margin-bottom: .85rem; }
+.review > p { color: var(--muted); max-width: 48rem; }
+.review-tools { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; justify-content: space-between; margin-block: 1.5rem .75rem; }
+.review-tools p { margin: 0; font-weight: 700; }
+select { font: inherit; color: var(--ink); border: 1px solid #8f9db2; border-radius: .35rem; padding: .5rem 2.2rem .5rem .7rem; background: white; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: .55rem; background: white; }
+table { border-collapse: collapse; width: 100%; text-align: left; }
+th, td { padding: .7rem .85rem; border-bottom: 1px solid var(--rule); }
+thead { background: var(--tint); }
+tbody tr:last-child td { border-bottom: 0; }
+td { overflow-wrap: anywhere; }
+td:first-child { font-weight: 700; }
+.record-source { display: block; color: var(--muted); font-size: .85rem; }
+.record-button { min-height: 2.35rem; padding: .3rem .6rem; font-size: .9rem; white-space: nowrap; }
+.record-details { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .8rem 1rem; margin: 1rem 0; }
+.record-details dt { font-weight: 700; }
+.record-details dd { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+.entry-content { border-top: 1px solid var(--rule); padding-top: 1rem; margin-top: 1rem; }
+.entry-content h3 { margin-bottom: .45rem; }
+.entry-content p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.attachment { padding: .65rem .8rem; border: 1px solid var(--rule); border-radius: .35rem; margin-top: .55rem; overflow-wrap: anywhere; }
+.attachment img, .attachment video { display: block; max-width: 100%; max-height: 14rem; margin-top: .5rem; }
+[hidden] { display: none !important; }
+@media (max-width: 42rem) {
+  .wrap { width: calc(100% - 2rem); }
+  th, td { padding-inline: .55rem; }
+}
+.access-label { font-weight: 700; color: var(--accent); font-size: .875rem; }
+.review-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1rem; }
+.review-head h1 { margin-bottom: .75rem; }
+.export { text-align: right; }
+.export p { margin: .35rem 0 0; color: var(--muted); font-size: .875rem; }
+.review-intro { margin-top: .65rem; }
+.review-controls { display: flex; flex-wrap: wrap; align-items: end; gap: .65rem; }
+.more { margin-top: 1rem; }
+.attachment a { display: inline-block; margin-top: .35rem; color: var(--accent); }
+.access-panel { margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--rule); border-radius: .65rem; background: #fff; }
+.access-panel summary { cursor: pointer; font-weight: 700; }
+.access-panel form { display: flex; align-items: end; flex-wrap: wrap; gap: .55rem; margin-block: .8rem; }
+.access-panel input { padding: .55rem; border: 1px solid var(--rule); border-radius: .4rem; font: inherit; max-width: 100%; }
+.reviewer-emails { list-style: none; padding: 0; margin: 0; }
+.reviewer-emails li { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; padding: .6rem 0; gap: .4rem 1rem; border-top: 1px solid var(--rule); overflow-wrap: anywhere; }
+@media (max-width: 42rem) { .export { text-align: left; } }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <span class="wordmark">BVC Logistics</span>
+  <span class="access-label">Private reviewer dashboard</span>
+</div></header>
+<main class="wrap review" id="reviewer" aria-labelledby="review-title">
+  <div class="review-head">
+    <div>
+      <p class="eyebrow">Foundation Week · 66 years</p>
+      <h1 id="review-title">Submissions</h1>
+    </div>
+    <div class="export">
+      <a class="btn" href="/api/export" download>Download all entries</a>
+      <p>ZIP with a CSV and all attachments</p>
+    </div>
+  </div>
+  <p class="review-intro">View employee submissions by activity. The download includes every entry and attachment, even when the list is filtered.</p>
+  <div class="review-tools">
+    <p id="record-count" role="status"></p>
+    <div class="review-controls"><div class="field">
+      <label for="activity-filter">Filter by activity</label>
+      <select id="activity-filter">
+        <option value="all">All activities</option>
+        <option value="drawing">Drawing Competition</option>
+        <option value="collage">A Day in Our Branch</option>
+        <option value="campaign">Best Ad Campaign</option>
+        <option value="journal">Grateful Journal</option>
+      </select>
+    </div><button class="btn outline" type="button" id="refresh-records">Refresh</button></div>
+  </div>
+  <div class="table-wrap" role="region" aria-label="Submissions table" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">Activity</th><th scope="col">Employee</th><th scope="col">Branch city</th><th scope="col">Received (IST)</th><th scope="col">Details</th></tr></thead>
+      <tbody id="records"></tbody>
+    </table>
+  </div>
+  <button class="btn outline more" type="button" id="load-more" hidden>Load more</button>
+  <p class="review-intro" id="mail-setup" hidden>You can add employee email addresses now. Code delivery is pending Brevo setup.</p>
+  <details class="access-panel" id="employee-access" hidden>
+    <summary>Manage employee emails</summary>
+    <p>Only the @bvclogistics.com addresses on this list can request a code or submit an entry on GitHub Pages.</p>
+    <form>
+      <div><label for="employee-email">Employee email</label><input id="employee-email" type="email" maxlength="254" required></div>
+      <button class="btn" type="submit">Add employee</button>
+    </form>
+    <p role="status"></p>
+    <ul class="reviewer-emails"></ul>
+  </details>
+  <details class="access-panel" id="access-panel" hidden>
+    <summary>Manage reviewer access</summary>
+    <p>Add the email addresses of people who should be able to view and download entries.</p>
+    <form id="add-reviewer">
+      <div><label for="reviewer-email">Reviewer email</label><input id="reviewer-email" type="email" maxlength="254" required></div>
+      <button class="btn" type="submit">Add reviewer</button>
+    </form>
+    <p role="status" id="access-status"></p>
+    <ul class="reviewer-emails" id="reviewer-emails"></ul>
+  </details>
+</main>
+<footer><div class="wrap"><p>BVC Logistics · Reviewer dashboard</p><form method="post" action="/auth/signout"><button class="btn outline" type="submit">Sign out</button></form></div></footer>
+<dialog id="record-dialog" aria-labelledby="record-title">
+  <div class="dialog-head">
+    <div><p class="eyebrow" id="record-source"></p><h2 id="record-title"></h2></div>
+    <form method="dialog"><button class="close" aria-label="Close submission details">×</button></form>
+  </div>
+  <dl class="record-details" id="record-details"></dl>
+  <div class="entry-content" id="record-content"></div>
+</dialog>
+<script>
+const filter = document.querySelector('#activity-filter');
+const records = document.querySelector('#records');
+const recordCount = document.querySelector('#record-count');
+const recordDialog = document.querySelector('#record-dialog');
+const recordDetails = document.querySelector('#record-details');
+const recordContent = document.querySelector('#record-content');
+const loadMore = document.querySelector('#load-more');
+let requestVersion = 0;
+let next = null;
+let displayed = 0;
+const receivedTime = new Intl.DateTimeFormat('en-IN', {
+  timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit'
+});
+function textElement(tag, text, className) {
+  const element = document.createElement(tag);
+  element.textContent = text;
+  if (className) element.className = className;
+  return element;
+}
+
+function renderRecords(entries) {
+  records.append(...entries.map(entry => {
+    const row = document.createElement('tr');
+    const activityCell = textElement('td', entry.activity);
+    const employeeCell = textElement('td', entry.employee);
+    employeeCell.append(textElement('span', entry.code, 'record-source'));
+    const detailsCell = document.createElement('td');
+    const button = textElement('button', 'View entry', 'btn outline record-button');
+    button.type = 'button';
+    button.setAttribute('aria-label', 'View ' + entry.activity + ' entry from ' + entry.employee);
+    button.addEventListener('click', () => showRecord(entry));
+    detailsCell.append(button);
+    row.append(activityCell, employeeCell, textElement('td', entry.branch),
+      textElement('td', receivedTime.format(new Date(entry.received))), detailsCell);
+    return row;
+  }));
+}
+
+async function fetchRecords(append = false) {
+  const version = ++requestVersion;
+  const params = new URLSearchParams();
+  if (filter.value !== 'all') params.set('activity', filter.value);
+  if (append && next) params.set('before', next);
+  loadMore.disabled = true;
+  if (!append) {
+    records.replaceChildren();
+    displayed = 0;
+    next = null;
+    loadMore.hidden = true;
+  }
+  recordCount.textContent = 'Loading submissions…';
+  try {
+    const response = await fetch('/api/entries?' + params);
+    if (!response.ok) throw Error('Could not load submissions.');
+    const result = await response.json();
+    if (version !== requestVersion) return;
+    renderRecords(result.entries);
+    displayed += result.entries.length;
+    next = result.next;
+    recordCount.textContent = displayed === 0 ? 'No submissions yet' :
+      displayed + (displayed === 1 ? ' submission' : ' submissions') + (next ? ' shown' : '');
+  } catch {
+    if (version === requestVersion) recordCount.textContent = 'Could not load submissions. Select Refresh to try again.';
+  } finally {
+    if (version === requestVersion) {
+      loadMore.disabled = false;
+      loadMore.hidden = !next;
+    }
+  }
+}
+
+function showRecord(entry) {
+  document.querySelector('#record-source').textContent = 'Receipt ' + entry.receipt;
+  document.querySelector('#record-title').textContent = entry.activity;
+  const details = [
+    ['Employee name', entry.employee], ['Employee code', entry.code], ['Work email', entry.email],
+    ['Branch city', entry.branch], ['Received (IST)', receivedTime.format(new Date(entry.received))],
+    ['Child’s name', entry.name], ['Campaign title', entry.campaign]
+  ];
+  recordDetails.replaceChildren(...details.filter(([, value]) => value).map(([label, value]) => {
+    const field = document.createElement('div');
+    field.append(textElement('dt', label), textElement('dd', value));
+    return field;
+  }));
+  if (entry.type === 'journal') {
+    recordContent.replaceChildren(textElement('h3', 'Journal entry'), textElement('p', entry.journal));
+  } else {
+    recordContent.replaceChildren(textElement('h3', 'Attachments'), ...entry.attachments.map(attachment => {
+      const item = document.createElement('div');
+      item.className = 'attachment';
+      item.append(textElement('strong', attachment.label), textElement('div', attachment.name));
+      const download = textElement('a', 'Download file');
+      download.href = attachment.url + '?download=1';
+      download.download = attachment.name;
+      item.append(download);
+      if (!['image/heic', 'image/heif'].includes(attachment.mime)) {
+        const preview = document.createElement(attachment.mime.startsWith('video/') ? 'video' : 'img');
+        if (preview.tagName === 'VIDEO') {
+          preview.controls = true;
+          preview.preload = 'metadata';
+          preview.setAttribute('aria-label', attachment.label);
+        } else {
+          preview.alt = attachment.label;
+        }
+        preview.src = attachment.url;
+        item.append(preview);
+      }
+      return item;
+    }));
+  }
+  recordDialog.showModal();
+  recordDialog.scrollTop = 0;
+}
+
+recordDialog.addEventListener('close', () => {
+  recordContent.replaceChildren();
+});
+
+filter.addEventListener('change', () => fetchRecords());
+document.querySelector('#refresh-records').addEventListener('click', () => fetchRecords());
+loadMore.addEventListener('click', () => fetchRecords(true));
+fetchRecords();
+
+function bindAccess({ selector, endpoint, listKey, label }) {
+  const panel = document.querySelector(selector);
+  const form = panel.querySelector('form');
+  const input = form.querySelector('input');
+  const status = panel.querySelector('[role=status]');
+  const list = panel.querySelector('ul');
+
+  async function refresh() {
+    const response = await fetch(endpoint);
+    if (!response.ok) throw Error('Could not load ' + label.toLowerCase() + ' access.');
+    const result = await response.json();
+    const people = result[listKey];
+    if (!people.length) {
+      list.replaceChildren(textElement('li', 'No emails added yet.'));
+      return;
+    }
+    list.replaceChildren(...people.map(person => {
+      const item = textElement('li', person.email);
+      if (person.role === 'admin') {
+        item.append(textElement('strong', 'Admin'));
+      } else {
+        const remove = textElement('button', 'Remove', 'btn outline record-button');
+        remove.type = 'button';
+        remove.setAttribute('aria-label', 'Remove ' + person.email);
+        remove.addEventListener('click', () => update('remove', person.email, remove));
+        item.append(remove);
+      }
+      return item;
+    }));
+  }
+
+  async function update(action, email, button) {
+    button.disabled = true;
+    status.textContent = '';
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, email })
+      });
+      const result = await response.json();
+      if (!response.ok) throw Error(result.error || 'Could not update access.');
+      await refresh();
+      status.textContent = label + (action === 'add' ? ' access added.' : ' access removed.');
+      if (action === 'add') form.reset();
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    update('add', input.value, form.querySelector('[type=submit]'));
+  });
+  panel.hidden = false;
+  refresh().catch(error => { status.textContent = error.message; });
+}
+
+fetch('/api/account').then(response => response.json()).then(account => {
+  if (account.role === 'admin') {
+    document.querySelector('#mail-setup').hidden = account.emailSignInReady;
+    bindAccess({ selector: '#employee-access', endpoint: '/api/employees', listKey: 'employees', label: 'Employee' });
+    bindAccess({ selector: '#access-panel', endpoint: '/api/reviewers', listKey: 'reviewers', label: 'Reviewer' });
+  }
+  if (!account.emailSignInReady) document.querySelector('footer form').hidden = true;
+}).catch(() => {});
+</script>
+</body>
+</html>
