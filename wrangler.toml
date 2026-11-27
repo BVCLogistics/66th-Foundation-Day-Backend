@@ -1,0 +1,27 @@
+# Cloudflare Worker config for the Foundation Week backend.
+# Secrets (AUTH_SECRET, BREVO_API_KEY) are never stored here: set them in
+# Cloudflare › Workers & Pages › bvc-foundation-week › Settings › Variables and Secrets.
+name = "bvc-foundation-week"
+main = "dist/server/index.js"
+compatibility_date = "2026-11-01"
+no_bundle = true
+workers_dev = true
+
+[build]
+command = "npm ci && npm run build"
+
+[vars]
+EMAIL_FROM = "marketing.team@bvclogistics.com"
+REVIEWER_ADMIN_EMAIL = "nikita.wadhawan@bvclogistics.com"
+EMPLOYEE_WEB_ORIGIN = "https://bvclogistics.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bvc-foundation-week"
+# Replace with the ID printed by: npx wrangler@4 d1 create bvc-foundation-week
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "."
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "bvc-foundation-week-entries"

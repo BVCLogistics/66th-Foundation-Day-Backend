@@ -58,10 +58,6 @@ export function workEmail(value) {
   return email && workEmailPattern.test(email) ? email : null;
 }
 
-export async function employeeAllowed(env, email) {
-  return Boolean(workEmail(email) && await env.DB.prepare('SELECT email FROM employee_allowlist WHERE email = ?').bind(email).first());
-}
-
 function code() {
   const random = new Uint32Array(1);
   const max = 4_294_000_000;
@@ -108,7 +104,6 @@ export async function startCode(env, scope, value, ip, currentChallenge = '') {
   await rateLimit(env, ip, scope);
   const challenge = crypto.randomUUID();
   if (scope === 'reviewer' && !await reviewerRole(env, email)) return challenge;
-  if (scope === 'employee' && !await employeeAllowed(env, email)) return challenge;
   const verificationCode = code();
   const now = Date.now();
   const hash = await signature(env.AUTH_SECRET, 'code:' + scope + ':' + challenge + ':' + verificationCode);
@@ -153,7 +148,6 @@ export async function verifyCode(env, scope, challenge, value) {
     throw new AuthError('That code is incorrect or expired. Enter it again or request a new code.');
   }
   if (scope === 'reviewer' && !await reviewerRole(env, result.email)) throw new AuthError('This email does not have reviewer access.', 403);
-  if (scope === 'employee' && !await employeeAllowed(env, result.email)) throw new AuthError('This email does not have employee access.', 403);
   return createSession(result.email, scope, env.AUTH_SECRET);
 }
 
