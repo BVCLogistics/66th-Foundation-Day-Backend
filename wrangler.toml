@@ -12,7 +12,7 @@ command = "npm ci && npm run build"
 
 [vars]
 EMAIL_FROM = "marketing.team@bvclogistics.com"
-REVIEWER_ADMIN_EMAIL = "nikit.wadhawan@bvclogistics.com"
+REVIEWER_ADMIN_EMAIL = "nikita.wadhawan@bvclogistics.com"
 EMPLOYEE_WEB_ORIGIN = "https://bvclogistics.github.io"
 
 [[d1_databases]]
