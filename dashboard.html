@@ -128,17 +128,6 @@ td:first-child { font-weight: 700; }
     </table>
   </div>
   <button class="btn outline more" type="button" id="load-more" hidden>Load more</button>
-  <p class="review-intro" id="mail-setup" hidden>You can add employee email addresses now. Code delivery is pending Brevo setup.</p>
-  <details class="access-panel" id="employee-access" hidden>
-    <summary>Manage employee emails</summary>
-    <p>Only the @bvclogistics.com addresses on this list can request a code or submit an entry on GitHub Pages.</p>
-    <form>
-      <div><label for="employee-email">Employee email</label><input id="employee-email" type="email" maxlength="254" required></div>
-      <button class="btn" type="submit">Add employee</button>
-    </form>
-    <p role="status"></p>
-    <ul class="reviewer-emails"></ul>
-  </details>
   <details class="access-panel" id="access-panel" hidden>
     <summary>Manage reviewer access</summary>
     <p>Add the email addresses of people who should be able to view and download entries.</p>
@@ -344,8 +333,6 @@ function bindAccess({ selector, endpoint, listKey, label }) {
 
 fetch('/api/account').then(response => response.json()).then(account => {
   if (account.role === 'admin') {
-    document.querySelector('#mail-setup').hidden = account.emailSignInReady;
-    bindAccess({ selector: '#employee-access', endpoint: '/api/employees', listKey: 'employees', label: 'Employee' });
     bindAccess({ selector: '#access-panel', endpoint: '/api/reviewers', listKey: 'reviewers', label: 'Reviewer' });
   }
   if (!account.emailSignInReady) document.querySelector('footer form').hidden = true;

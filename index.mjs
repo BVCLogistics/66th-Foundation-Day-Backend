@@ -1,6 +1,6 @@
 import page from './dashboard.html';
 import { ZipWriter } from '@zip.js/zip.js/lib/zip-core-writer.js';
-import { AuthError, emailAddress, employeeAllowed, mailReady, readJson, reviewerRole, startCode, verifyCode, workEmail } from './email-auth.mjs';
+import { AuthError, emailAddress, mailReady, readJson, reviewerRole, startCode, verifyCode, workEmail } from './email-auth.mjs';
 import { authResponse, challengeName, cookie, sessionEmail, signOut, verifiedEmail } from './session.mjs';
 import { loginPage } from './login-page.mjs';
 
@@ -190,8 +190,7 @@ async function employeeApi(request, env, path) {
     } else if (request.method === 'POST' && path === '/api/employee/submissions') {
       const token = request.headers.get('authorization')?.match(/^Bearer ([A-Za-z0-9_.-]+)$/)?.[1] || '';
       const email = await verifiedEmail(token, 'employee', env.AUTH_SECRET);
-      if (!email) response = json({ error: 'Verify your work email before submitting.' }, 401);
-      else if (!await employeeAllowed(env, email)) response = json({ error: 'This email no longer has submission access. Contact the BVC team.' }, 403);
+      if (!workEmail(email)) response = json({ error: 'Verify your work email before submitting.' }, 401);
       else response = await saveEmployeeEntry(request, env, email);
     } else {
       response = json({ error: 'Not found.' }, 404);
@@ -374,7 +373,6 @@ export default {
       }
       if (request.method === 'GET' && url.pathname === '/api/account') return json({ role, emailSignInReady: mailReady(env) });
       if (url.pathname === '/api/reviewers') return await manageReviewers(request, env, role);
-      if (url.pathname === '/api/employees') return await manageEmployees(request, env, role);
       if (request.method !== 'GET') return json({ error: 'Not found.' }, 404);
       if (url.pathname === '/') return new Response(page, { headers: { ...headers, 'Content-Type': 'text/html; charset=utf-8' } });
       if (url.pathname === '/api/entries') return await reviewList(url, env.DB);
@@ -413,21 +411,3 @@ async function manageReviewers(request, env, role) {
   return json({ ok: true });
 }
 
-async function manageEmployees(request, env, role) {
-  if (role !== 'admin') return json({ error: 'Employee access is managed by the dashboard admin.' }, 403);
-  if (request.method === 'GET') {
-    const { results } = await env.DB.prepare('SELECT email FROM employee_allowlist ORDER BY email').all();
-    return json({ employees: results });
-  }
-  if (request.method !== 'POST') return json({ error: 'Not found.' }, 404);
-  const body = await readJson(request);
-  const email = workEmail(body.email);
-  if (!email || !['add', 'remove'].includes(body.action)) return json({ error: 'Enter a valid @bvclogistics.com email address.' }, 400);
-  if (body.action === 'add') {
-    await env.DB.prepare('INSERT INTO employee_allowlist (email, added_at) VALUES (?, ?) ON CONFLICT(email) DO NOTHING')
-      .bind(email, new Date().toISOString()).run();
-  } else {
-    await env.DB.prepare('DELETE FROM employee_allowlist WHERE email = ?').bind(email).run();
-  }
-  return json({ ok: true });
-}
